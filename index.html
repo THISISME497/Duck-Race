@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Duck Race</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="setup-container">
+        <h1>🦆 Custom Duck Race Generator</h1>
+        <p>Enter names (one per line) and race duration:</p>
+        <textarea id="names-input" placeholder="John&#10;Sarah&#10;Alex"></textarea>
+        <br>
+        <label for="duration-input">Race Duration (seconds): </label>
+        <input type="number" id="duration-input" value="10" min="3">
+        <br><br>
+        <button id="start-btn">Start Race! 🏁</button>
+    </div>
+
+    <div id="race-container" class="hidden">
+        <h2 id="timer-display">Time Left: --s</h2>
+        <div id="track"></div>
+        <h2 id="winner-display" class="hidden"></h2>
+        <button id="reset-btn" class="hidden">Reset Race</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
