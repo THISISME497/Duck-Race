@@ -105,7 +105,7 @@
             text-align: left;
         }
 
-        select, input[type="number"] {
+        input[type="number"] {
             background: #334155;
             border: 2px solid #475569;
             color: white;
@@ -179,12 +179,6 @@
             z-index: 3;
         }
 
-        .duck-sprite {
-            font-size: 38px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-            animation: swim-bob 0.4s infinite alternate ease-in-out;
-        }
-
         .duck-name {
             font-size: 11px;
             font-weight: bold;
@@ -198,11 +192,6 @@
             border: 1px solid #cbd5e1;
         }
 
-        @keyframes swim-bob {
-            0% { transform: translateY(0) rotate(-2deg); }
-            100% { transform: translateY(-4px) rotate(4deg); }
-        }
-
         .hidden { display: none !important; }
     </style>
 </head>
@@ -212,14 +201,7 @@
         <div class="header-bar">
             <h2>🦆 DuckRace Studio Pro</h2>
             <div id="auth-container">
-                <div id="g_id_onload"
-                    data-client_id="://googleusercontent.com"
-                    data-context="signin"
-                    data-ux_mode="popup"
-                    data-callback="handleCredentialResponse"
-                    data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="large"></div>
+                <div id="google-login-btn"></div>
             </div>
             <div id="user-profile" class="hidden">
                 <img id="user-img" class="user-avatar" src="" alt="Avatar">
@@ -234,17 +216,6 @@
             <textarea id="names-input" placeholder="Enter names (one per line)">Alpha&#10;Bravo&#10;Charlie&#10;Delta</textarea>
             
             <div class="form-group">
-                <label>
-                    Race Vehicle Skin
-                    <select id="skin-select">
-                        <option value="🦆">🐤 Yellow Duckling</option>
-                        <option value="👑">👑 Royal King Duck</option>
-                        <option value="🥷">🥷 Ninja Duck</option>
-                        <option value="🚀">🚀 Rocket Space Duck</option>
-                        <option value="🤖">🤖 Android Robo Duck</option>
-                        <option value="🤠">🤠 Cowboy Duck</option>
-                    </select>
-                </label>
                 <label>
                     Race Duration (seconds)
                     <input type="number" id="duration-input" value="12" min="3" max="60">
@@ -270,6 +241,19 @@
 
         let raceInterval, timerInterval;
 
+        window.onload = function () {
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: "://googleusercontent.com",
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("google-login-btn"),
+                    { theme: "filled_black", size: "large", shape: "pill" }
+                );
+            }
+        };
+
         function handleCredentialResponse(response) {
             const data = parseJwt(response.credential);
             document.getElementById('auth-container').classList.add('hidden');
@@ -284,14 +268,75 @@
             return JSON.parse(window.atob(base64));
         }
 
-        function logout() {
-            location.reload();
+        function logout() { location.reload(); }
+
+        function drawCustomDuck(canvasId, hueColor) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 60, 60);
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 3;
+
+            // Draw Body
+            ctx.beginPath();
+            ctx.arc(26, 36, 16, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#050b14';
+            ctx.stroke();
+
+            // Draw Tail details
+            ctx.beginPath();
+            ctx.moveTo(12, 30);
+            ctx.quadraticCurveTo(4, 22, 6, 34);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw Head
+            ctx.beginPath();
+            ctx.arc(40, 22, 10, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.shadowColor = 'transparent';
+
+            // Draw Beak 
+            ctx.beginPath();
+            ctx.moveTo(48, 20);
+            ctx.quadraticCurveTo(58, 22, 48, 26);
+            ctx.closePath();
+            ctx.fillStyle = '#ff5722';
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw Eye 
+            ctx.beginPath();
+            ctx.arc(42, 19, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#000000';
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(43, 18, 0.8, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            // Draw Wing layer accent
+            ctx.beginPath();
+            ctx.ellipse(24, 37, 8, 5, Math.PI / 12, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 45%)`;
+            ctx.fill();
+            ctx.stroke();
         }
 
         function startRace() {
             const namesText = document.getElementById('names-input').value.trim();
             const duration = parseInt(document.getElementById('duration-input').value) || 12;
-            const chosenSkin = document.getElementById('skin-select').value;
             
             if (!namesText) return alert('Enter at least one runner!');
 
@@ -302,16 +347,24 @@
             document.getElementById('setup-container').classList.add('hidden');
             document.getElementById('race-container').classList.remove('hidden');
 
-            const ducks = names.map((name) => {
+            const ducks = names.map((name, index) => {
                 const lane = document.createElement('div');
                 lane.className = 'duck-lane';
                 
+                const assignedHue = Math.floor((index / names.length) * 360);
+                const canvasId = `duck-canvas-${index}`;
+                
                 const duckElement = document.createElement('div');
                 duckElement.className = 'duck';
-                duckElement.innerHTML = `<span class="duck-sprite">${chosenSkin}</span><span class="duck-name">${name}</span>`;
+                duckElement.innerHTML = `
+                    <canvas id="${canvasId}" width="60" height="60" style="width:55px; height:55px;"></canvas>
+                    <span class="duck-name">${name}</span>
+                `;
                 
                 lane.appendChild(duckElement);
                 track.appendChild(lane);
+
+                setTimeout(() => drawCustomDuck(canvasId, assignedHue), 0);
 
                 return { element: duckElement, name: name, position: 10, velocity: 0, finished: false };
             });
