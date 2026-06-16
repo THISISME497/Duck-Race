@@ -15,187 +15,7 @@
             --text-main: #f8fafc;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            background: radial-gradient(circle at top, #1e293b, #0f172a);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-
-        #user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            margin-top: 0;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
-        }
-
-        textarea {
-            width: 100%;
-            max-width: 500px;
-            height: 120px;
-            background: #334155;
-            border: 2px solid #475569;
-            border-radius: 8px;
-            color: white;
-            padding: 10px;
-            font-size: 16px;
-            resize: none;
-            outline: none;
-        }
-
-        textarea:focus {
-            border-color: var(--primary);
-        }
-        .form-group {
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        label {
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            text-align: left;
-        }
-
-        input[type="number"] {
-            background: #334155;
-            border: 2px solid #475569;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #000;
-            border: none;
-            padding: 12px 35px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4);
-            transition: transform 0.1s, box-shadow 0.3s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 204, 0, 0.6);
-        }
-
-        #track {
-            width: 100%;
-            background: linear-gradient(180deg, #0284c7, #0369a1);
-            border: 6px solid #1e293b;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.4);
-            margin: 20px 0;
-        }
-
-        .track-header-finish {
-            position: absolute;
-            right: 80px;
-            top: 0;
-            bottom: 0;
-            width: 10px;
-            background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px);
-            z-index: 2;
-        }
-
-        .duck-lane {
-            height: 85px;
-            border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .duck-lane:last-child {
-            border-bottom: none;
-        }
-
-        .duck {
-            position: absolute;
-            left: 10px;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: left 0.03s linear;
-            z-index: 3;
-        }
-
-        .duck-name {
-            font-size: 11px;
-            font-weight: bold;
-            color: #0f172a;
-            background: #fff;
-            padding: 2px 6px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            white-space: nowrap;
-            margin-top: -2px;
-            border: 1px solid #cbd5e1;
-        }
-
-        .hidden { display: none !important; }
-    </style>
-</head>
-<body>
+        <body>
     <div class="container">
         <!-- Auth Header -->
         <div class="header-bar">
@@ -285,18 +105,14 @@
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
 
-            // 1. FAT RUBBER DUCK BODY (Asymmetrical teardrop shape)
+            // 1. FAT RUBBER DUCK BODY
             ctx.beginPath();
-            ctx.moveTo(15, 38); // Start at tail base
-            // Back curve up to the perk tail tip
+            ctx.moveTo(15, 38); 
             ctx.quadraticCurveTo(8, 28, 10, 24); 
-            // Tail scoop down into the main body depth
             ctx.quadraticCurveTo(14, 32, 22, 35);
-            // Thick chest and belly line
-            ctx.bezierCurveTo(34, 35, 54, 38, 54, 50); // Chest chest wall bulge
-            ctx.bezierCurveTo(54, 62, 22, 62, 16, 52); // Flat heavy bottom layer
+            ctx.bezierCurveTo(34, 35, 54, 38, 54, 50); 
+            ctx.bezierCurveTo(54, 62, 22, 62, 16, 52); 
             ctx.closePath();
-            
             ctx.fillStyle = fillStyle;
             ctx.fill();
             ctx.strokeStyle = strokeStyle;
@@ -312,17 +128,17 @@
             // 3. THICK STUMPY RUBBER WING
             ctx.beginPath();
             ctx.ellipse(28, 48, 10, 6, Math.PI / 10, 0, Math.PI * 2);
-            ctx.fillStyle = shadowStyle; // Darker core hue for perspective depth
+            ctx.fillStyle = shadowStyle; 
             ctx.fill();
             ctx.stroke();
 
-            // 4. ROUNDED CARTOON BEAK (Overlaps the right side face correctly)
+            // 4. ROUNDED CARTOON BEAK
             ctx.beginPath();
             ctx.moveTo(53, 22);
-            ctx.bezierCurveTo(64, 21, 64, 28, 53, 29); // Upper beak lip bulb
+            ctx.bezierCurveTo(64, 21, 64, 28, 53, 29); 
             ctx.bezierCurveTo(49, 29, 49, 24, 53, 22);
             ctx.closePath();
-            ctx.fillStyle = '#ff5722'; // Neon Orange
+            ctx.fillStyle = '#ff5722'; 
             ctx.fill();
             ctx.stroke();
 
@@ -332,7 +148,6 @@
             ctx.fillStyle = '#000000';
             ctx.fill();
             
-            // Eye gleam light reflection dot
             ctx.beginPath();
             ctx.arc(47, 21, 0.7, 0, Math.PI * 2);
             ctx.fillStyle = '#ffffff';
@@ -378,7 +193,7 @@
             const timerDisplay = document.getElementById('timer-display');
             timerDisplay.innerText = `Time Remaining: ${timeLeft}s`;
 
-            const trackWidth = track.clientWidth - 155; 
+            const trackWidth = (track.clientWidth > 100) ? (track.clientWidth - 155) : 700; 
             let winner = null;
 
             raceInterval = setInterval(() => {
@@ -413,10 +228,12 @@
                     clearInterval(raceInterval);
                     clearInterval(timerInterval);
                     
+                    // FIX: Safely extract first duck object from array index 0
                     if (!winner && ducks.length > 0) {
                         const sorted = [...ducks].sort((a,b) => b.position - a.position);
-                        winner = sorted.name;
-                        sorted.element.style.left = trackWidth + 'px';
+                        const topDuck = sorted[0]; 
+                        winner = topDuck.name;
+                        topDuck.element.style.left = trackWidth + 'px';
                     }
                     declareWinner(winner);
                 }
@@ -435,4 +252,9 @@
             document.getElementById('race-container').classList.add('hidden');
             document.getElementById('winner-display').classList.add('hidden');
             document.getElementById('reset-btn').classList.add('hidden');
-clearInterval(raceInterval);clearInterval(timerInterval);}
+            clearInterval(raceInterval);
+            clearInterval(timerInterval);
+        }
+    </script>
+</body>
+</html>
