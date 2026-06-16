@@ -4,27 +4,190 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Duck Race</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        textarea {
+            width: 300px;
+            height: 150px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        #track {
+            width: 90%;
+            max-width: 900px;
+            background: linear-gradient(180deg, #1e90ff, #00bfff);
+            border: 6px solid #333;
+            border-radius: 8px;
+            margin: 20px auto;
+            overflow: hidden;
+            position: relative;
+            padding: 10px 0;
+        }
+        .duck-lane {
+            height: 60px;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.6);
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .duck {
+            position: absolute;
+            left: 0;
+            font-size: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: left 0.03s linear;
+        }
+        .duck-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            background: white;
+            padding: 1px 5px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-top: -5px;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body>
     <div id="setup-container">
         <h1>🦆 Custom Duck Race Generator</h1>
-        <p>Enter names (one per line) and race duration:</p>
-        <textarea id="names-input" placeholder="John&#10;Sarah&#10;Alex"></textarea>
-        <br>
+        <p>Enter names (one per line):</p>
+        <textarea id="names-input" placeholder="John&#10;Sarah&#10;Alex">Player 1&#10;Player 2&#10;Player 3</textarea>
+        <br><br>
         <label for="duration-input">Race Duration (seconds): </label>
         <input type="number" id="duration-input" value="10" min="3">
         <br><br>
-        <button id="start-btn">Start Race! 🏁</button>
+        <button id="start-btn" style="padding: 10px 20px; font-size: 18px; cursor: pointer;">Start Race! 🏁</button>
     </div>
 
     <div id="race-container" class="hidden">
         <h2 id="timer-display">Time Left: --s</h2>
         <div id="track"></div>
-        <h2 id="winner-display" class="hidden"></h2>
-        <button id="reset-btn" class="hidden">Reset Race</button>
+        <h1 id="winner-display" class="hidden" style="color: #ff4500; margin: 20px;"></h1>
+        <button id="reset-btn" class="hidden" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Reset Race</button>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        document.getElementById('start-btn').addEventListener('click', startRace);
+        document.getElementById('reset-btn').addEventListener('click', resetGame);
+
+        let raceInterval;
+        let timerInterval;
+
+        function startRace() {
+            const namesText = document.getElementById('names-input').value.trim();
+            const duration = parseInt(document.getElementById('duration-input').value) || 10;
+            
+            if (!namesText) {
+                alert('Please enter at least one name!');
+                return;
+            }
+
+            const names = namesText.split('\n').filter(name => name.trim() !== '');
+            const track = document.getElementById('track');
+            track.innerHTML = ''; 
+
+            document.getElementById('setup-container').classList.add('hidden');
+            document.getElementById('race-container').classList.remove('hidden');
+
+            const ducks = names.map((name) => {
+                const lane = document.createElement('div');
+                lane.className = 'duck-lane';
+                
+                const duckElement = document.createElement('div');
+                duckElement.className = 'duck';
+                duckElement.innerHTML = `🦆 <span class="duck-name">${name}</span>`;
+                
+                lane.appendChild(duckElement);
+                track.appendChild(lane);
+
+                return {
+                    element: duckElement,
+                    name: name,
+                    position: 0,
+                    velocity: 0, 
+                    finished: false
+                };
+            });
+
+            let timeLeft = duration;
+            const timerDisplay = document.getElementById('timer-display');
+            timerDisplay.innerText = `Time Left: ${timeLeft}s`;
+
+            const trackWidth = (track.clientWidth > 100) ? (track.clientWidth - 70) : 700; 
+            let winner = null;
+
+            raceInterval = setInterval(() => {
+                ducks.forEach(duck => {
+                    if (duck.finished) return;
+
+                    let acceleration = Math.random() * 0.5; 
+                    if (Math.random() < 0.15) {
+                        acceleration += (Math.random() - 0.4) * 3.0; 
+                    }
+
+                    duck.velocity += acceleration;
+                    duck.velocity *= 0.82; 
+                    if (duck.velocity < 0) duck.velocity = 0; 
+
+                    duck.position += duck.velocity;
+
+                    if (duck.position >= trackWidth) {
+                        duck.position = trackWidth;
+                        duck.finished = true;
+                        if (!winner) {
+                            winner = duck.name;
+                        }
+                    }
+                    duck.element.style.left = duck.position + 'px';
+                });
+            }, 33);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = `Time Left: ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(raceInterval);
+                    clearInterval(timerInterval);
+                    
+                    if (!winner && ducks.length > 0) {
+                        const sortedDucks = [...ducks].sort((a, b) => b.position - a.position);
+                        const winningDuck = sortedDucks[0]; 
+                        winner = winningDuck.name;
+                        winningDuck.element.style.left = trackWidth + 'px';
+                    }
+
+                    declareWinner(winner);
+                }
+            }, 1000);
+        }
+
+        function declareWinner(name) {
+            const display = document.getElementById('winner-display');
+            display.innerText = `🎉 WINNER: ${name}! 🎉`;
+            display.classList.remove('hidden');
+            document.getElementById('reset-btn').classList.remove('hidden');
+        }
+
+        function resetGame() {
+            document.getElementById('setup-container').classList.remove('hidden');
+            document.getElementById('race-container').classList.add('hidden');
+            document.getElementById('winner-display').classList.add('hidden');
+            document.getElementById('reset-btn').classList.add('hidden');
+            clearInterval(raceInterval);
+            clearInterval(timerInterval);
+        }
+    </script>
 </body>
 </html>
