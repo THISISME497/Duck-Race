@@ -155,7 +155,7 @@
         }
 
         .duck-lane {
-            height: 75px;
+            height: 85px;
             border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
             position: relative;
             display: flex;
@@ -169,8 +169,8 @@
         .duck {
             position: absolute;
             left: 10px;
-            width: 55px;
-            height: 55px;
+            width: 70px;
+            height: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -270,68 +270,73 @@
 
         function logout() { location.reload(); }
 
+        // 🟨 AUTHENTIC RUBBER DUCK VECTOR ILLUSTRATOR ENGINE 
         function drawCustomDuck(canvasId, hueColor) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, 60, 60);
+            ctx.clearRect(0, 0, 70, 70);
 
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 4;
-            ctx.shadowOffsetY = 3;
+            const fillStyle = `hsl(${hueColor}, 100%, 50%)`;
+            const shadowStyle = `hsl(${hueColor}, 100%, 40%)`;
+            const strokeStyle = '#0b0f19';
 
-            // Draw Body
+            ctx.lineWidth = 2.5;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+
+            // 1. FAT RUBBER DUCK BODY (Asymmetrical teardrop shape)
             ctx.beginPath();
-            ctx.arc(26, 36, 16, 0, Math.PI * 2);
-            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#050b14';
-            ctx.stroke();
-
-            // Draw Tail details
-            ctx.beginPath();
-            ctx.moveTo(12, 30);
-            ctx.quadraticCurveTo(4, 22, 6, 34);
-            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
-            ctx.fill();
-            ctx.stroke();
-
-            // Draw Head
-            ctx.beginPath();
-            ctx.arc(40, 22, 10, 0, Math.PI * 2);
-            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.shadowColor = 'transparent';
-
-            // Draw Beak 
-            ctx.beginPath();
-            ctx.moveTo(48, 20);
-            ctx.quadraticCurveTo(58, 22, 48, 26);
+            ctx.moveTo(15, 38); // Start at tail base
+            // Back curve up to the perk tail tip
+            ctx.quadraticCurveTo(8, 28, 10, 24); 
+            // Tail scoop down into the main body depth
+            ctx.quadraticCurveTo(14, 32, 22, 35);
+            // Thick chest and belly line
+            ctx.bezierCurveTo(34, 35, 54, 38, 54, 50); // Chest chest wall bulge
+            ctx.bezierCurveTo(54, 62, 22, 62, 16, 52); // Flat heavy bottom layer
             ctx.closePath();
-            ctx.fillStyle = '#ff5722';
+            
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+            ctx.strokeStyle = strokeStyle;
+            ctx.stroke();
+
+            // 2. ROUND CHUBBY HEAD OVERLAY
+            ctx.beginPath();
+            ctx.arc(44, 25, 11, 0, Math.PI * 2);
+            ctx.fillStyle = fillStyle;
             ctx.fill();
             ctx.stroke();
 
-            // Draw Eye 
+            // 3. THICK STUMPY RUBBER WING
             ctx.beginPath();
-            ctx.arc(42, 19, 2.5, 0, Math.PI * 2);
+            ctx.ellipse(28, 48, 10, 6, Math.PI / 10, 0, Math.PI * 2);
+            ctx.fillStyle = shadowStyle; // Darker core hue for perspective depth
+            ctx.fill();
+            ctx.stroke();
+
+            // 4. ROUNDED CARTOON BEAK (Overlaps the right side face correctly)
+            ctx.beginPath();
+            ctx.moveTo(53, 22);
+            ctx.bezierCurveTo(64, 21, 64, 28, 53, 29); // Upper beak lip bulb
+            ctx.bezierCurveTo(49, 29, 49, 24, 53, 22);
+            ctx.closePath();
+            ctx.fillStyle = '#ff5722'; // Neon Orange
+            ctx.fill();
+            ctx.stroke();
+
+            // 5. LARGE EXPRESSIVE EYE 
+            ctx.beginPath();
+            ctx.arc(46, 22, 2.5, 0, Math.PI * 2);
             ctx.fillStyle = '#000000';
             ctx.fill();
             
+            // Eye gleam light reflection dot
             ctx.beginPath();
-            ctx.arc(43, 18, 0.8, 0, Math.PI * 2);
+            ctx.arc(47, 21, 0.7, 0, Math.PI * 2);
             ctx.fillStyle = '#ffffff';
             ctx.fill();
-
-            // Draw Wing layer accent
-            ctx.beginPath();
-            ctx.ellipse(24, 37, 8, 5, Math.PI / 12, 0, Math.PI * 2);
-            ctx.fillStyle = `hsl(${hueColor}, 95%, 45%)`;
-            ctx.fill();
-            ctx.stroke();
         }
 
         function startRace() {
@@ -357,7 +362,7 @@
                 const duckElement = document.createElement('div');
                 duckElement.className = 'duck';
                 duckElement.innerHTML = `
-                    <canvas id="${canvasId}" width="60" height="60" style="width:55px; height:55px;"></canvas>
+                    <canvas id="${canvasId}" width="70" height="70" style="width:65px; height:65px;"></canvas>
                     <span class="duck-name">${name}</span>
                 `;
                 
@@ -373,7 +378,7 @@
             const timerDisplay = document.getElementById('timer-display');
             timerDisplay.innerText = `Time Remaining: ${timeLeft}s`;
 
-            const trackWidth = track.clientWidth - 145; 
+            const trackWidth = track.clientWidth - 155; 
             let winner = null;
 
             raceInterval = setInterval(() => {
@@ -410,8 +415,8 @@
                     
                     if (!winner && ducks.length > 0) {
                         const sorted = [...ducks].sort((a,b) => b.position - a.position);
-                        winner = sorted[0].name;
-                        sorted[0].element.style.left = trackWidth + 'px';
+                        winner = sorted.name;
+                        sorted.element.style.left = trackWidth + 'px';
                     }
                     declareWinner(winner);
                 }
@@ -430,9 +435,4 @@
             document.getElementById('race-container').classList.add('hidden');
             document.getElementById('winner-display').classList.add('hidden');
             document.getElementById('reset-btn').classList.add('hidden');
-            clearInterval(raceInterval);
-            clearInterval(timerInterval);
-        }
-    </script>
-</body>
-</html>
+clearInterval(raceInterval);clearInterval(timerInterval);}
