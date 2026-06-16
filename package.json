@@ -1,0 +1,10 @@
+{
+  "name": "arcade-duck-race",
+  "version": "1.0.0",
+  "description": "Custom Duck Race Game with Google Auth",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
