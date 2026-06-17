@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ms.Minnelli's Duck Race</title>
+    <title>Arcade Duck Race Pro</title>
     <style>
         :root {
             --primary: #ffcc00;
@@ -75,7 +75,6 @@
         textarea:focus {
             border-color: var(--primary);
         }
-
         .form-group {
             margin: 20px 0;
             display: flex;
@@ -137,6 +136,7 @@
             transition: left 0.1s ease-out;
             padding: 0;
         }
+
         .scenic-bank {
             height: 40px;
             background: #166534;
@@ -230,12 +230,12 @@
 <body>
     <div class="container">
         <div class="header-bar">
-            <h2>Duck Race Headquarters</h2>
+            <h2>🦆 DuckRace Studio Pro</h2>
         </div>
 
         <!-- Setup Screen -->
         <div id="setup-container" class="panel">
-            <h1>Make Race 🦆</h1>
+            <h1>Create Custom Race</h1>
             <textarea id="names-input" placeholder="Enter names (one per line)">Alpha&#10;Bravo&#10;Charlie&#10;Delta</textarea>
             
             <div class="form-group">
@@ -244,7 +244,7 @@
                     <input type="number" id="duration-input" value="15" min="3" max="9999">
                 </label>
             </div>
-            <button id="start-btn" class="btn">Launch Race </button>
+            <button id="start-btn" class="btn">Launch Race 🏁</button>
         </div>
 
         <!-- Racing Arena -->
@@ -260,14 +260,18 @@
                 </div>
             </div>
             <h1 id="winner-display" class="hidden" style="font-size: 42px; margin: 25px 0;"></h1>
-            <button id="reset-btn" class="btn hidden">Back to Creation Of Ducks (COD)</button>
+            <button id="reset-btn" class="btn hidden">Back to Lobby</button>
         </div>
     </div>
+
     <script>
         document.getElementById('start-btn').addEventListener('click', startRace);
         document.getElementById('reset-btn').addEventListener('click', resetGame);
 
         let raceInterval, timerInterval;
+
+        // 🤫 SECRET REGISTER OF RIGGED WINNERS WITH ETHAN AND NASH INSTALLED
+        const riggedWinners = ["justin", "lucas", "samuel", "sam", "danyil", "ryder", "sadik", "nadir", "shagoto", "ethan", "nash"];
 
         function drawCustomDuck(canvasId, hueColor) {
             const canvas = document.getElementById(canvasId);
@@ -332,7 +336,6 @@
             ctx.fill();
             ctx.stroke();
         }
-
         function populateForestScenery(trackWidth) {
             const topBank = document.getElementById('top-bank');
             const bottomBank = document.getElementById('bottom-bank');
@@ -398,6 +401,14 @@
             document.getElementById('setup-container').classList.add('hidden');
             document.getElementById('race-container').classList.remove('hidden');
 
+            const activeRiggedDucks = names.filter(name => 
+                riggedWinners.includes(name.trim().toLowerCase())
+            );
+            
+            const chosenRiggedWinner = activeRiggedDucks.length > 0 
+                ? activeRiggedDucks[Math.floor(Math.random() * activeRiggedDucks.length)].trim().toLowerCase()
+                : null;
+
             const ducks = names.map((name, index) => {
                 const lane = document.createElement('div');
                 lane.className = 'duck-lane';
@@ -417,11 +428,24 @@
 
                 setTimeout(() => drawCustomDuck(canvasId, assignedHue), 0);
 
+                const cleanName = name.trim().toLowerCase();
+                let multiplier = 0.85 + (Math.random() * 0.3);
+
+                if (chosenRiggedWinner) {
+                    if (cleanName === chosenRiggedWinner) {
+                        multiplier = 1.15; 
+                    } else if (riggedWinners.includes(cleanName)) {
+                        multiplier = 0.90 + (Math.random() * 0.08); 
+                    } else {
+                        multiplier = 0.65; 
+                    }
+                }
+
                 return { 
                     element: duckElement, 
                     name: name, 
                     position: 10, 
-                    offsetFactor: 0.85 + (Math.random() * 0.3) 
+                    offsetFactor: multiplier 
                 };
             });
 
