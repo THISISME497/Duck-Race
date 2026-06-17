@@ -22,6 +22,7 @@
             padding: 20px;
             background: radial-gradient(circle at top, #1e293b, #0f172a);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .container {
@@ -119,24 +120,34 @@
             box-shadow: 0 6px 20px rgba(255, 204, 0, 0.6);
         }
 
-        #track {
+        /* 🎥 CAMERA WINDOW LOOKOUT CONTAINER */
+        #track-viewport {
             width: 100%;
-            background: linear-gradient(180deg, #1e90ff, #00bfff);
+            overflow-x: hidden; /* Crops out the rest of the massive track */
             border: 6px solid #1e293b;
             border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.4);
             margin: 20px 0;
-            min-height: 50px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            background: #0284c7;
+        }
+
+        /* The actual expandable track lane canvas backdrop */
+        #track {
+            width: 100%; /* Dynamically changed by JavaScript */
+            background: linear-gradient(180deg, #1e90ff, #00bfff);
+            position: relative;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.4);
+            padding: 10px 0;
+            left: 0;
+            transition: left 0.1s ease-out; /* Smooth camera panning effect */
         }
 
         .track-header-finish {
             position: absolute;
-            right: 80px;
+            right: 120px;
             top: 0;
             bottom: 0;
-            width: 10px;
+            width: 20px;
             background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px);
             z-index: 2;
         }
@@ -147,7 +158,6 @@
             position: relative;
             display: flex;
             align-items: center;
-            width: 100%;
         }
 
         .duck-lane:last-child {
@@ -196,8 +206,8 @@
             
             <div class="form-group">
                 <label>
-                    Target Race Duration (seconds)
-                    <input type="number" id="duration-input" value="12" min="3" max="60">
+                    Race Time (seconds)
+                    <input type="number" id="duration-input" value="15" min="3" max="9999">
                 </label>
             </div>
             <button id="start-btn" class="btn">Launch Race 🏁</button>
@@ -205,9 +215,11 @@
 
         <!-- Racing Arena -->
         <div id="race-container" class="panel hidden">
-            <h2 id="timer-display" style="font-size: 28px; color: var(--primary);">Racing... 🏁</h2>
-            <div id="track">
-                <div class="track-header-finish"></div>
+            <h2 id="timer-display" style="font-size: 28px; color: var(--primary);">Time Left: --s</h2>
+            <div id="track-viewport">
+                <div id="track">
+                    <div class="track-header-finish"></div>
+                </div>
             </div>
             <h1 id="winner-display" class="hidden" style="font-size: 42px; margin: 25px 0;"></h1>
             <button id="reset-btn" class="btn hidden">Back to Lobby</button>
@@ -218,7 +230,7 @@
         document.getElementById('start-btn').addEventListener('click', startRace);
         document.getElementById('reset-btn').addEventListener('click', resetGame);
 
-        let raceInterval;
+        let raceInterval, timerInterval;
 
         function drawCustomDuck(canvasId, hueColor) {
             const canvas = document.getElementById(canvasId);
@@ -286,12 +298,20 @@
 
         function startRace() {
             const namesText = document.getElementById('names-input').value.trim();
-            const duration = parseInt(document.getElementById('duration-input').value) || 12;
+            const duration = parseInt(document.getElementById('duration-input').value) || 15;
             
             if (!namesText) return alert('Enter at least one runner!');
 
             const names = namesText.split('\n').filter(n => n.trim() !== '');
+            const trackViewport = document.getElementById('track-viewport');
             const track = document.getElementById('track');
+            
+            // 🏎️ DYNAMIC LONG-DISTANCE ENGINE RATIO
+            // Base speed is around 150px per second. We widen the track based on your set seconds!
+            const dynamicTrackWidth = Math.max(trackViewport.clientWidth, duration * 140);
+            track.style.width = dynamicTrackWidth + 'px';
+            track.style.left = '0px'; // Reset track scroll placement
+            
             track.innerHTML = '<div class="track-header-finish"></div>';
 
             document.getElementById('setup-container').classList.add('hidden');
@@ -316,43 +336,68 @@
 
                 setTimeout(() => drawCustomDuck(canvasId, assignedHue), 0);
 
-                return { element: duckElement, name: name, position: 10, velocity: 0, finished: false };
+                return { element: duckElement, name: name, position: 10, velocity: 0 };
             });
 
-            const trackWidth = (track.clientWidth > 100) ? (track.clientWidth - 145) : 700; 
+            let timeLeft = duration;
+            const timerDisplay = document.getElementById('timer-display');
+            timerDisplay.innerText = `Time Remaining: ${timeLeft}s`;
+
+            const finishLineX = dynamicTrackWidth - 180; 
             let winner = null;
 
-            // 🎯 NEW NATURAL PHYSICS ENGINE: No countdown timer cutoff.
-            // Speed scaling adjusts automatically to hit your target duration timeframe organically.
-            const speedModifier = (trackWidth / (duration * 30)) * 0.8;
+            // ⏱️ Accurate 1-Second Global Countdown Loop
+            timerInterval = setInterval(() => {
+                if (winner) return;
+                timeLeft--;
+                if (timeLeft < 0) timeLeft = 0;
+                timerDisplay.innerText = `Time Remaining: ${timeLeft}s`;
+            }, 1000);
 
+            // 🎬 30fps Real-Time Physics and Dynamic Camera Engine
             raceInterval = setInterval(() => {
-                ducks.forEach(duck => {
-                    if (winner) return; // Freeze everyone instantly once the true winner touches the line
+                let maxPosition = 0;
 
-                    let acceleration = Math.random() * speedModifier;
-                    if (Math.random() < 0.18) {
-                        acceleration += (Math.random() - 0.42) * (speedModifier * 6);
+                ducks.forEach(duck => {
+                    if (winner) return;
+
+                    // Standard unthrottled movement parameters
+                    let acceleration = Math.random() * 0.7;
+                    if (Math.random() < 0.16) {
+                        acceleration += (Math.random() - 0.45) * 4.2;
                     }
 
                     duck.velocity += acceleration;
-                    duck.velocity *= 0.83; 
+                    duck.velocity *= 0.84; 
                     if (duck.velocity < 0) duck.velocity = 0;
 
                     duck.position += duck.velocity;
 
-                    // Stop the entire loop the exact instant a duck touches the line boundary
-                    if (duck.position >= trackWidth) {
-                        duck.position = trackWidth;
-                        duck.finished = true;
+                    if (duck.position > maxPosition) {
+                        maxPosition = duck.position;
+                    }
+
+                    // Natural finish line verification trigger
+                    if (duck.position >= finishLineX) {
+                        duck.position = finishLineX;
                         winner = duck.name;
                     }
                     duck.element.style.left = duck.position + 'px';
                 });
 
-                // End the animation and display the true winner naturally
+                // 🎥 THE LIVE CAMERA PANNING MECHANIC:
+                // Shifts the water track layout backward relative to how far out the leader swims
+                const viewWidth = trackViewport.clientWidth;
+                if (maxPosition > viewWidth * 0.4) {
+                    const cameraOffset = (viewWidth * 0.4) - maxPosition;
+                    // Prevent camera from scrolling past the finish line checkerboard wall
+                    const minLeft = viewWidth - dynamicTrackWidth;
+                    track.style.left = Math.max(minLeft, cameraOffset) + 'px';
+                }
+
                 if (winner) {
                     clearInterval(raceInterval);
+                    clearInterval(timerInterval);
                     declareWinner(winner);
                 }
             }, 33);
@@ -371,8 +416,10 @@
             document.getElementById('race-container').classList.add('hidden');
             document.getElementById('winner-display').classList.add('hidden');
             document.getElementById('reset-btn').classList.add('hidden');
-            document.getElementById('timer-display').innerText = "Racing... 🏁";
+            document.getElementById('timer-display').innerText = "Time Remaining: --s";
+            document.getElementById('track').style.left = '0px';
             clearInterval(raceInterval);
+            clearInterval(timerInterval);
         }
     </script>
 </body>
