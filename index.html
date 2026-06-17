@@ -120,41 +120,62 @@
             box-shadow: 0 6px 20px rgba(255, 204, 0, 0.6);
         }
 
-        /* 🎥 CAMERA WINDOW LOOKOUT CONTAINER */
         #track-viewport {
             width: 100%;
-            overflow-x: hidden; /* Crops out the rest of the massive track */
+            overflow-x: hidden;
             border: 6px solid #1e293b;
             border-radius: 12px;
             margin: 20px 0;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            background: #0284c7;
+            background: #15803d; /* Forest green fallback base color */
         }
 
-        /* The actual expandable track lane canvas backdrop */
         #track {
-            width: 100%; /* Dynamically changed by JavaScript */
-            background: linear-gradient(180deg, #1e90ff, #00bfff);
+            width: 100%;
             position: relative;
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.4);
-            padding: 10px 0;
             left: 0;
-            transition: left 0.1s ease-out; /* Smooth camera panning effect */
+            transition: left 0.1s ease-out;
+            padding: 0;
+        }
+
+        /* 🌲 SCENIC FOREST BORDERS */
+        .scenic-bank {
+            height: 40px;
+            background: #166534; /* Dark mossy forest ridge */
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .tree-decoration {
+            position: absolute;
+            font-size: 26px;
+            bottom: 4px;
+            user-select: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+
+        .river-bed {
+            background: linear-gradient(180deg, #0284c7, #0369a1);
+            position: relative;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.3), inset 0 -10px 20px rgba(0,0,0,0.3);
         }
 
         .track-header-finish {
             position: absolute;
-            right: 120px;
+            right: 140px;
             top: 0;
             bottom: 0;
-            width: 20px;
-            background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px);
+            width: 24px;
+            background: repeating-linear-gradient(45deg, #fff, #fff 12px, #000 12px, #000 24px);
             z-index: 2;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
         }
 
         .duck-lane {
-            height: 75px;
-            border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
+            height: 80px;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.25);
             position: relative;
             display: flex;
             align-items: center;
@@ -162,6 +183,22 @@
 
         .duck-lane:last-child {
             border-bottom: none;
+        }
+
+        /* 🏁 SPEED INDICATOR BUOYS */
+        .buoy-marker {
+            position: absolute;
+            font-size: 14px;
+            opacity: 0.4;
+            user-select: none;
+            color: #fff;
+            font-weight: bold;
+            border-left: 2px dotted rgba(255,255,255,0.3);
+            height: 100%;
+            padding-left: 5px;
+            display: flex;
+            align-items: flex-start;
+            padding-top: 5px;
         }
 
         .duck {
@@ -218,7 +255,16 @@
             <h2 id="timer-display" style="font-size: 28px; color: var(--primary);">Time Left: --s</h2>
             <div id="track-viewport">
                 <div id="track">
-                    <div class="track-header-finish"></div>
+                    <!-- Top Tree Line Bank -->
+                    <div id="top-bank" class="scenic-bank"></div>
+                    
+                    <!-- Water Lanes Body -->
+                    <div id="river" class="river-bed">
+                        <div class="track-header-finish"></div>
+                    </div>
+                    
+                    <!-- Bottom Tree Line Bank -->
+                    <div id="bottom-bank" class="scenic-bank"></div>
                 </div>
             </div>
             <h1 id="winner-display" class="hidden" style="font-size: 42px; margin: 25px 0;"></h1>
@@ -296,6 +342,54 @@
             ctx.stroke();
         }
 
+        // 🌲 SCENIC PROCEDURAL MAP GENERATOR
+        function populateForestScenery(trackWidth) {
+            const topBank = document.getElementById('top-bank');
+            const bottomBank = document.getElementById('bottom-bank');
+            const river = document.getElementById('river');
+            
+            topBank.innerHTML = '';
+            bottomBank.innerHTML = '';
+            
+            const treeSkins = ['🌲', '🌳', '🌴', '🌿'];
+            const spacing = 75; // Distance between obstacles
+            const totalDecorations = Math.floor(trackWidth / spacing);
+
+            for (let i = 0; i < totalDecorations - 2; i++) {
+                const xPos = 40 + (i * spacing) + (Math.random() * 20);
+                
+                // Top Bank Tree
+                const topTree = document.createElement('span');
+                topTree.className = 'tree-decoration';
+                topTree.innerText = treeSkins[Math.floor(Math.random() * treeSkins.length)];
+                topTree.style.left = xPos + 'px';
+                topTree.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
+                topBank.appendChild(topTree);
+
+                // Bottom Bank Tree
+                const bottomTree = document.createElement('span');
+                bottomTree.className = 'tree-decoration';
+                bottomTree.innerText = treeSkins[Math.floor(Math.random() * treeSkins.length)];
+                bottomTree.style.left = (xPos + 30) + 'px'; // Staggered offset
+                bottomTree.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
+                bottomBank.appendChild(bottomTree);
+            }
+
+            // 🏁 Add floating mileage speed markers inside the water lanes
+            const buoySpacing = 400;
+            const totalBuoys = Math.floor(trackWidth / buoySpacing);
+            for (let b = 1; b < totalBuoys; b++) {
+                const buoyX = b * buoySpacing;
+                if (buoyX < trackWidth - 250) {
+                    const buoy = document.createElement('div');
+                    buoy.className = 'buoy-marker';
+                    buoy.style.left = buoyX + 'px';
+                    buoy.innerText = `🚩 ${buoyX}m`;
+                    river.appendChild(buoy);
+                }
+            }
+        }
+
         function startRace() {
             const namesText = document.getElementById('names-input').value.trim();
             const duration = parseInt(document.getElementById('duration-input').value) || 15;
@@ -305,14 +399,14 @@
             const names = namesText.split('\n').filter(n => n.trim() !== '');
             const trackViewport = document.getElementById('track-viewport');
             const track = document.getElementById('track');
+            const river = document.getElementById('river');
             
-            // 🏎️ DYNAMIC LONG-DISTANCE ENGINE RATIO
-            // Base speed is around 150px per second. We widen the track based on your set seconds!
-            const dynamicTrackWidth = Math.max(trackViewport.clientWidth, duration * 140);
+            const dynamicTrackWidth = Math.max(trackViewport.clientWidth, duration * 180);
             track.style.width = dynamicTrackWidth + 'px';
-            track.style.left = '0px'; // Reset track scroll placement
+            track.style.left = '0px'; 
             
-            track.innerHTML = '<div class="track-header-finish"></div>';
+            river.innerHTML = '<div class="track-header-finish"></div>';
+            populateForestScenery(dynamicTrackWidth);
 
             document.getElementById('setup-container').classList.add('hidden');
             document.getElementById('race-container').classList.remove('hidden');
@@ -332,21 +426,27 @@
                 `;
                 
                 lane.appendChild(duckElement);
-                track.appendChild(lane);
+                river.appendChild(lane);
 
                 setTimeout(() => drawCustomDuck(canvasId, assignedHue), 0);
 
-                return { element: duckElement, name: name, position: 10, velocity: 0 };
+                return { 
+                    element: duckElement, 
+                    name: name, 
+                    position: 10, 
+                    offsetFactor: 0.85 + (Math.random() * 0.3) 
+                };
             });
 
             let timeLeft = duration;
             const timerDisplay = document.getElementById('timer-display');
             timerDisplay.innerText = `Time Remaining: ${timeLeft}s`;
 
-            const finishLineX = dynamicTrackWidth - 180; 
+            const finishLineX = dynamicTrackWidth - 210; 
+            const startTime = Date.now();
+            const totalDurationMs = duration * 1000;
             let winner = null;
 
-            // ⏱️ Accurate 1-Second Global Countdown Loop
             timerInterval = setInterval(() => {
                 if (winner) return;
                 timeLeft--;
@@ -354,73 +454,29 @@
                 timerDisplay.innerText = `Time Remaining: ${timeLeft}s`;
             }, 1000);
 
-            // 🎬 30fps Real-Time Physics and Dynamic Camera Engine
             raceInterval = setInterval(() => {
+                const elapsedMs = Date.now() - startTime;
+                const timeProgress = Math.min(elapsedMs / totalDurationMs, 1.0);
+                
                 let maxPosition = 0;
 
                 ducks.forEach(duck => {
                     if (winner) return;
 
-                    // Standard unthrottled movement parameters
-                    let acceleration = Math.random() * 0.7;
-                    if (Math.random() < 0.16) {
-                        acceleration += (Math.random() - 0.45) * 4.2;
+                    const wobble = (Math.sin(elapsedMs * 0.005 + duck.offsetFactor * 100) * 25);
+                    duck.position = 10 + (finishLineX - 10) * timeProgress * duck.offsetFactor + wobble;
+
+                    if (duck.position < 10) duck.position = 10;
+                    if (duck.position >= finishLineX || timeProgress >= 1.0) {
+                        duck.position = finishLineX;
                     }
-
-                    duck.velocity += acceleration;
-                    duck.velocity *= 0.84; 
-                    if (duck.velocity < 0) duck.velocity = 0;
-
-                    duck.position += duck.velocity;
 
                     if (duck.position > maxPosition) {
                         maxPosition = duck.position;
                     }
 
-                    // Natural finish line verification trigger
-                    if (duck.position >= finishLineX) {
-                        duck.position = finishLineX;
+                    if (duck.position >= finishLineX && !winner) {
                         winner = duck.name;
                     }
-                    duck.element.style.left = duck.position + 'px';
-                });
 
-                // 🎥 THE LIVE CAMERA PANNING MECHANIC:
-                // Shifts the water track layout backward relative to how far out the leader swims
-                const viewWidth = trackViewport.clientWidth;
-                if (maxPosition > viewWidth * 0.4) {
-                    const cameraOffset = (viewWidth * 0.4) - maxPosition;
-                    // Prevent camera from scrolling past the finish line checkerboard wall
-                    const minLeft = viewWidth - dynamicTrackWidth;
-                    track.style.left = Math.max(minLeft, cameraOffset) + 'px';
-                }
-
-                if (winner) {
-                    clearInterval(raceInterval);
-                    clearInterval(timerInterval);
-                    declareWinner(winner);
-                }
-            }, 33);
-        }
-
-        function declareWinner(name) {
-            const display = document.getElementById('winner-display');
-            display.innerText = `👑 WINNER: ${name}! 👑`;
-            display.classList.remove('hidden');
-            document.getElementById('reset-btn').classList.remove('hidden');
-            document.getElementById('timer-display').innerText = "Race Finished!";
-        }
-
-        function resetGame() {
-            document.getElementById('setup-container').classList.remove('hidden');
-            document.getElementById('race-container').classList.add('hidden');
-            document.getElementById('winner-display').classList.add('hidden');
-            document.getElementById('reset-btn').classList.add('hidden');
-            document.getElementById('timer-display').innerText = "Time Remaining: --s";
-            document.getElementById('track').style.left = '0px';
-            clearInterval(raceInterval);
-            clearInterval(timerInterval);
-        }
-    </script>
-</body>
-</html>
+duck.element.style.left = duck.position + 'px';});const viewWidth = trackViewport.clientWidth;if (maxPosition > viewWidth * 0.4) {const cameraOffset = (viewWidth * 0.4) - maxPosition;const minLeft = viewWidth - dynamicTrackWidth;track.style.left = Math.max(minLeft, cameraOffset) + 'px';}if (timeProgress >= 1.0 || winner) {clearInterval(raceInterval);clearInterval(timerInterval);if (!winner) {const sorted = [...ducks].sort((a,b) => b.position - a.position);winner = sorted[0].name;}declareWinner(winner);}}, 33);}function declareWinner(name) {const display = document.getElementById('winner-display');display.innerText = 👑 WINNER: ${name}! 👑;display.classList.remove('hidden');document.getElementById('reset-btn').classList.remove('hidden');document.getElementById('timer-display').innerText = "Race Finished!";}function resetGame() {document.getElementById('setup-container').classList.remove('hidden');document.getElementById('race-container').classList.add('hidden');document.getElementById('winner-display').classList.add('hidden');document.getElementById('reset-btn').classList.add('hidden');document.getElementById('timer-display').innerText = "Time Remaining: --s";document.getElementById('track').style.left = '0px';clearInterval(raceInterval);clearInterval(timerInterval)
