@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Race Pro</title>
+    <title>Arcade Duck Race Pro</title>
     <style>
         :root {
             --primary: #ffcc00;
@@ -119,10 +119,9 @@
             box-shadow: 0 6px 20px rgba(255, 204, 0, 0.6);
         }
 
-        /* 🌲 FOREST RIDGE RACING TRACK */
         #track {
             width: 100%;
-            background: linear-gradient(180deg, #10b981, #047857); /* Lush green valley background */
+            background: linear-gradient(180deg, #1e90ff, #00bfff);
             border: 6px solid #1e293b;
             border-radius: 12px;
             overflow: hidden;
@@ -143,8 +142,8 @@
         }
 
         .duck-lane {
-            height: 80px;
-            border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+            height: 75px;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
             position: relative;
             display: flex;
             align-items: center;
@@ -168,11 +167,6 @@
             z-index: 3;
         }
 
-        .bird-sprite {
-            font-size: 36px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-        }
-
         .duck-name {
             font-size: 11px;
             font-weight: bold;
@@ -182,7 +176,7 @@
             border-radius: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             white-space: nowrap;
-            margin-top: 2px;
+            margin-top: -2px;
             border: 1px solid #cbd5e1;
         }
 
@@ -192,7 +186,7 @@
 <body>
     <div class="container">
         <div class="header-bar">
-            <h2>🦅 Custom Racing Studio</h2>
+            <h2>🦆 DuckRace Studio Pro</h2>
         </div>
 
         <!-- Setup Screen -->
@@ -226,8 +220,69 @@
 
         let raceInterval, timerInterval;
 
-        // Bird emoji array pool to shuffle unique looks per lane automatically
-        const birdSkins = ['🦅', '🦆', '🦉', '🦤', '🦜', '🦩', '🕊️', '🐧'];
+        function drawCustomDuck(canvasId, hueColor) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 60, 60);
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 3;
+
+            // Body
+            ctx.beginPath();
+            ctx.arc(26, 36, 16, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`; 
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#050b14';
+            ctx.stroke();
+
+            // Tail
+            ctx.beginPath();
+            ctx.moveTo(12, 30);
+            ctx.quadraticCurveTo(4, 22, 6, 34);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
+            ctx.fill();
+            ctx.stroke();
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(40, 22, 10, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 55%)`;
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.shadowColor = 'transparent';
+
+            // Beak
+            ctx.beginPath();
+            ctx.moveTo(48, 20);
+            ctx.quadraticCurveTo(58, 22, 48, 26);
+            ctx.closePath();
+            ctx.fillStyle = '#ff5722';
+            ctx.fill();
+            ctx.stroke();
+
+            // Eye
+            ctx.beginPath();
+            ctx.arc(42, 19, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#000000';
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(43, 18, 0.8, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            // Wing
+            ctx.beginPath();
+            ctx.ellipse(24, 37, 8, 5, Math.PI / 12, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${hueColor}, 95%, 45%)`; 
+            ctx.fill();
+            ctx.stroke();
+        }
 
         function startRace() {
             const namesText = document.getElementById('names-input').value.trim();
@@ -246,18 +301,20 @@
                 const lane = document.createElement('div');
                 lane.className = 'duck-lane';
                 
-                // Grab a dynamic bird template style out of the pool index smoothly
-                const assignedBird = birdSkins[index % birdSkins.length];
+                const assignedHue = Math.floor((index / names.length) * 360);
+                const canvasId = `duck-canvas-${index}`;
                 
                 const duckElement = document.createElement('div');
                 duckElement.className = 'duck';
                 duckElement.innerHTML = `
-                    <span class="bird-sprite">${assignedBird}</span>
+                    <canvas id="${canvasId}" width="60" height="60" style="width:55px; height:55px;"></canvas>
                     <span class="duck-name">${name}</span>
                 `;
                 
                 lane.appendChild(duckElement);
                 track.appendChild(lane);
+
+                setTimeout(() => drawCustomDuck(canvasId, assignedHue), 0);
 
                 return { element: duckElement, name: name, position: 10, velocity: 0, finished: false };
             });
@@ -302,4 +359,31 @@
                     clearInterval(timerInterval);
                     
                     if (!winner && ducks.length > 0) {
-const sorted = [...ducks].sort((a,b) => b.position - a.position);const topDuck = sorted[0];winner = topDuck.name;topDuck.element.style.left = trackWidth + 'px';}declareWinner(winner);}}, 1000);}function declareWinner(name) {const display = document.getElementById('winner-display');display.innerText = 👑 WINNER: ${name}! 👑;display.classList.remove('hidden');document.getElementById('reset-btn').classList.remove('hidden');}function resetGame() {document.getElementById('setup-container').classList.remove('hidden');document.getElementById('race-container').classList.add('hidden');document.getElementById('winner-display').classList.add('hidden');document.getElementById('reset-btn').classList.add('hidden');clearInterval(raceInterval);clearInterval(timerInterval);}
+                        const sorted = [...ducks].sort((a,b) => b.position - a.position);
+                        const topDuck = sorted[0]; 
+                        winner = topDuck.name;
+                        topDuck.element.style.left = trackWidth + 'px';
+                    }
+                    declareWinner(winner);
+                }
+            }, 1000);
+        }
+
+        function declareWinner(name) {
+            const display = document.getElementById('winner-display');
+            display.innerText = `👑 WINNER: ${name}! 👑`;
+            display.classList.remove('hidden');
+            document.getElementById('reset-btn').classList.remove('hidden');
+        }
+
+        function resetGame() {
+            document.getElementById('setup-container').classList.remove('hidden');
+            document.getElementById('race-container').classList.add('hidden');
+            document.getElementById('winner-display').classList.add('hidden');
+            document.getElementById('reset-btn').classList.add('hidden');
+            clearInterval(raceInterval);
+            clearInterval(timerInterval);
+        }
+    </script>
+</body>
+</html>
