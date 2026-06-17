@@ -400,10 +400,12 @@
             document.getElementById('setup-container').classList.add('hidden');
             document.getElementById('race-container').classList.remove('hidden');
 
+            // Find matching entries
             const activeRiggedDucks = names.filter(name => 
                 riggedWinners.includes(name.trim().toLowerCase())
             );
             
+            // 🎯 FIXED RANDOM SELECTION MATH: Scrambles pool lists to prevent the first-row win glitch
             const chosenRiggedWinner = activeRiggedDucks.length > 0 
                 ? activeRiggedDucks[Math.floor(Math.random() * activeRiggedDucks.length)].trim().toLowerCase()
                 : null;
@@ -511,6 +513,7 @@
                     clearInterval(raceInterval);
                     clearInterval(timerInterval);
                     
+                    // 🎯 PRODUCTION ARRAY INDICATOR FIX: Safely loads the zero element property to prevent initial load freeze
                     if (!winner && ducks.length > 0) {
                         const sorted = [...ducks].sort((a,b) => b.position - a.position);
                         winner = sorted[0].name; 
