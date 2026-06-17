@@ -127,7 +127,7 @@
             border-radius: 12px;
             margin: 20px 0;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            background: #15803d; /* Forest green fallback base color */
+            background: #166534;
         }
 
         #track {
@@ -137,11 +137,9 @@
             transition: left 0.1s ease-out;
             padding: 0;
         }
-
-        /* 🌲 SCENIC FOREST BORDERS */
         .scenic-bank {
             height: 40px;
-            background: #166534; /* Dark mossy forest ridge */
+            background: #166534;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -185,7 +183,6 @@
             border-bottom: none;
         }
 
-        /* 🏁 SPEED INDICATOR BUOYS */
         .buoy-marker {
             position: absolute;
             font-size: 14px;
@@ -255,15 +252,10 @@
             <h2 id="timer-display" style="font-size: 28px; color: var(--primary);">Time Left: --s</h2>
             <div id="track-viewport">
                 <div id="track">
-                    <!-- Top Tree Line Bank -->
                     <div id="top-bank" class="scenic-bank"></div>
-                    
-                    <!-- Water Lanes Body -->
                     <div id="river" class="river-bed">
                         <div class="track-header-finish"></div>
                     </div>
-                    
-                    <!-- Bottom Tree Line Bank -->
                     <div id="bottom-bank" class="scenic-bank"></div>
                 </div>
             </div>
@@ -271,7 +263,6 @@
             <button id="reset-btn" class="btn hidden">Back to Lobby</button>
         </div>
     </div>
-
     <script>
         document.getElementById('start-btn').addEventListener('click', startRace);
         document.getElementById('reset-btn').addEventListener('click', resetGame);
@@ -342,7 +333,6 @@
             ctx.stroke();
         }
 
-        // 🌲 SCENIC PROCEDURAL MAP GENERATOR
         function populateForestScenery(trackWidth) {
             const topBank = document.getElementById('top-bank');
             const bottomBank = document.getElementById('bottom-bank');
@@ -352,13 +342,12 @@
             bottomBank.innerHTML = '';
             
             const treeSkins = ['🌲', '🌳', '🌴', '🌿'];
-            const spacing = 75; // Distance between obstacles
+            const spacing = 75; 
             const totalDecorations = Math.floor(trackWidth / spacing);
 
             for (let i = 0; i < totalDecorations - 2; i++) {
                 const xPos = 40 + (i * spacing) + (Math.random() * 20);
                 
-                // Top Bank Tree
                 const topTree = document.createElement('span');
                 topTree.className = 'tree-decoration';
                 topTree.innerText = treeSkins[Math.floor(Math.random() * treeSkins.length)];
@@ -366,16 +355,14 @@
                 topTree.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
                 topBank.appendChild(topTree);
 
-                // Bottom Bank Tree
                 const bottomTree = document.createElement('span');
                 bottomTree.className = 'tree-decoration';
                 bottomTree.innerText = treeSkins[Math.floor(Math.random() * treeSkins.length)];
-                bottomTree.style.left = (xPos + 30) + 'px'; // Staggered offset
+                bottomTree.style.left = (xPos + 30) + 'px'; 
                 bottomTree.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
                 bottomBank.appendChild(bottomTree);
             }
 
-            // 🏁 Add floating mileage speed markers inside the water lanes
             const buoySpacing = 400;
             const totalBuoys = Math.floor(trackWidth / buoySpacing);
             for (let b = 1; b < totalBuoys; b++) {
@@ -401,7 +388,7 @@
             const track = document.getElementById('track');
             const river = document.getElementById('river');
             
-            const dynamicTrackWidth = Math.max(trackViewport.clientWidth, duration * 180);
+            const dynamicTrackWidth = Math.max(trackViewport.clientWidth, duration * 150);
             track.style.width = dynamicTrackWidth + 'px';
             track.style.left = '0px'; 
             
@@ -471,12 +458,53 @@
                         duck.position = finishLineX;
                     }
 
-                    if (duck.position > maxPosition) {
-                        maxPosition = duck.position;
-                    }
+                    if (duck.position > maxPosition) { maxPosition = duck.position; }
 
                     if (duck.position >= finishLineX && !winner) {
                         winner = duck.name;
                     }
 
-duck.element.style.left = duck.position + 'px';});const viewWidth = trackViewport.clientWidth;if (maxPosition > viewWidth * 0.4) {const cameraOffset = (viewWidth * 0.4) - maxPosition;const minLeft = viewWidth - dynamicTrackWidth;track.style.left = Math.max(minLeft, cameraOffset) + 'px';}if (timeProgress >= 1.0 || winner) {clearInterval(raceInterval);clearInterval(timerInterval);if (!winner) {const sorted = [...ducks].sort((a,b) => b.position - a.position);winner = sorted[0].name;}declareWinner(winner);}}, 33);}function declareWinner(name) {const display = document.getElementById('winner-display');display.innerText = 👑 WINNER: ${name}! 👑;display.classList.remove('hidden');document.getElementById('reset-btn').classList.remove('hidden');document.getElementById('timer-display').innerText = "Race Finished!";}function resetGame() {document.getElementById('setup-container').classList.remove('hidden');document.getElementById('race-container').classList.add('hidden');document.getElementById('winner-display').classList.add('hidden');document.getElementById('reset-btn').classList.add('hidden');document.getElementById('timer-display').innerText = "Time Remaining: --s";document.getElementById('track').style.left = '0px';clearInterval(raceInterval);clearInterval(timerInterval)
+                    duck.element.style.left = duck.position + 'px';
+                });
+
+                const viewWidth = trackViewport.clientWidth;
+                if (maxPosition > viewWidth * 0.4) {
+                    const cameraOffset = (viewWidth * 0.4) - maxPosition;
+                    const minLeft = viewWidth - dynamicTrackWidth;
+                    track.style.left = Math.max(minLeft, cameraOffset) + 'px';
+                }
+
+                if (timeProgress >= 1.0 || winner) {
+                    clearInterval(raceInterval);
+                    clearInterval(timerInterval);
+                    
+                    if (!winner) {
+                        const sorted = [...ducks].sort((a,b) => b.position - a.position);
+                        winner = sorted[0].name; 
+                    }
+                    declareWinner(winner);
+                }
+            }, 33);
+        }
+
+        function declareWinner(name) {
+            const display = document.getElementById('winner-display');
+            display.innerText = `👑 WINNER: ${name}! 👑`;
+            display.classList.remove('hidden');
+            document.getElementById('reset-btn').classList.remove('hidden');
+            document.getElementById('timer-display').innerText = "Race Finished!";
+        }
+
+        function resetGame() {
+            document.getElementById('setup-container').classList.remove('hidden');
+            document.getElementById('race-container').classList.add('hidden');
+            document.getElementById('winner-display').classList.add('hidden');
+            document.getElementById('reset-btn').classList.add('hidden');
+            document.getElementById('timer-display').innerText = "Time Remaining: --s";
+            document.getElementById('track').style.left = '0px';
+            clearInterval(raceInterval);
+            clearInterval(timerInterval);
+        }
+    </script>
+</body>
+</html>
