@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ms.Minnelli's Duck Race!</title>
+    <title>Arcade Duck Race Pro</title>
     <style>
         :root {
             --primary: #ffcc00;
@@ -230,12 +230,12 @@
 <body>
     <div class="container">
         <div class="header-bar">
-            <h2>Duck Race Headquarters 🦆</h2>
+            <h2>🦆 DuckRace Studio Pro</h2>
         </div>
 
         <!-- Setup Screen -->
         <div id="setup-container" class="panel">
-            <h1>Create Duck Race</h1>
+            <h1>Create Custom Race</h1>
             <textarea id="names-input" placeholder="Enter names (one per line)">Alpha&#10;Bravo&#10;Charlie&#10;Delta</textarea>
             
             <div class="form-group">
@@ -244,7 +244,7 @@
                     <input type="number" id="duration-input" value="15" min="3" max="9999">
                 </label>
             </div>
-            <button id="start-btn" class="btn">Launch Race!</button>
+            <button id="start-btn" class="btn">Launch Race 🏁</button>
         </div>
 
         <!-- Racing Arena -->
@@ -270,7 +270,7 @@
 
         let raceInterval, timerInterval;
 
-        const riggedWinners = ["justin", "lucas", "samuel", "sam", "danyil", "ryder", "sadik", "nadir", "shagoto", "ethan", "nash", "andrew"];
+        const riggedWinners = ["justin", "lucas", "samuel", "sam", "danyil", "ryder", "sadik", "nadir", "shagoto", "ethan", "nash"];
 
         function drawCustomDuck(canvasId, hueColor) {
             const canvas = document.getElementById(canvasId);
@@ -429,7 +429,7 @@
 
                 return { 
                     element: duckElement, 
-                    name: name.trim().toLowerCase(), 
+                    name: name.trim(), 
                     position: 10, 
                     wobbleSeed: Math.random() * 50
                 };
@@ -443,7 +443,6 @@
             const startTime = Date.now();
             const totalDurationMs = duration * 1000;
             let winner = null;
-
             timerInterval = setInterval(() => {
                 if (winner) return;
                 timeLeft--;
@@ -460,39 +459,31 @@
                 ducks.forEach(duck => {
                     if (winner) return;
 
-                    // Standard organic wobble calculation
                     const naturalWobble = Math.sin(elapsedMs * 0.004 + duck.wobbleSeed) * 20;
-                    
-                    // 🤫 STEALTH RIG ENGINE CODES
                     let currentScaleFactor = 0.95; 
+
+                    const cleanName = duck.name.toLowerCase();
 
                     if (chosenRiggedWinner) {
                         if (timeProgress < 0.75) {
-                            // 🏁 FIRST 75% OF THE RACE: Pure chaos. 
-                            // Give random advantages to make outside ducks pull ahead or lag naturally.
-                            if (duck.name === chosenRiggedWinner) {
-                                currentScaleFactor = 0.88 + (Math.sin(elapsedMs * 0.002) * 0.08); // Looks like it's struggling
+                            if (cleanName === chosenRiggedWinner) {
+                                currentScaleFactor = 0.88 + (Math.sin(elapsedMs * 0.002) * 0.08); 
                             } else {
                                 currentScaleFactor = 0.92 + (Math.cos(elapsedMs * 0.0015 + duck.wobbleSeed) * 0.12);
                             }
                         } else {
-                            // 🏎️ FINAL 25% RETRIEVAL: Trigger rubber-band comeback sprint execution
                             const finishStretchProgress = (timeProgress - 0.75) / 0.25; 
                             
-                            if (duck.name === chosenRiggedWinner) {
-                                // Chosen winner speeds up aggressively right at the finish line
+                            if (cleanName === chosenRiggedWinner) {
                                 currentScaleFactor = 0.90 + (finishStretchProgress * 0.26); 
                             } else {
-                                // Outside names gently clamp down so they stall near the finish
                                 currentScaleFactor = Math.min(1.0, 1.02 - (finishStretchProgress * 0.08));
                             }
                         }
                     } else {
-                        // Natural un-rigged parameters if your list isn't playing
                         currentScaleFactor = 0.88 + (Math.sin(elapsedMs * 0.001 + duck.wobbleSeed) * 0.15);
                     }
 
-                    // Map math rendering constraints
                     duck.position = 10 + (finishLineX - 10) * timeProgress * currentScaleFactor + naturalWobble;
 
                     if (duck.position < 10) duck.position = 10;
@@ -520,7 +511,7 @@
                     clearInterval(raceInterval);
                     clearInterval(timerInterval);
                     
-                    if (!winner) {
+                    if (!winner && ducks.length > 0) {
                         const sorted = [...ducks].sort((a,b) => b.position - a.position);
                         winner = sorted[0].name; 
                     }
@@ -531,7 +522,6 @@
 
         function declareWinner(name) {
             const display = document.getElementById('winner-display');
-            // Capitalize first letter of winner neatly for display panel
             const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
             display.innerText = `👑 WINNER: ${formattedName}! 👑`;
             display.classList.remove('hidden');
@@ -548,4 +538,7 @@
             document.getElementById('track').style.left = '0px';
             clearInterval(raceInterval);
             clearInterval(timerInterval);
-            }
+        }
+    </script>
+</body>
+</html>
