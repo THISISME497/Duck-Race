@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mrs.Minnelli's Duck Race</title>
+    <title>Mrs.Millenni's Duck Race</title>
     <style>
         :root {
             --primary: #ffcc00;
@@ -229,7 +229,7 @@
 <body>
     <div class="container">
         <div class="header-bar">
-            <h2>Duck Race Headquarters🦆</h2>
+            <h2>Duck Race Headquarters Head🦆</h2>
         </div>
 
         <!-- Setup Screen -->
@@ -270,8 +270,38 @@ Delta</textarea>
         document.getElementById('reset-btn').addEventListener('click', resetGame);
 
         let raceInterval, timerInterval;
+        let isRacing = false; 
 
         const riggedWinners = ["danyil", "daniel"];
+
+        // Попередньо завантажуємо аудіофайли для миттєвого відтворення
+        const sfxHorn = new Audio('horn.mp3');
+        const sfxQuack = new Audio('quack.mp3');
+
+        // Налаштовуємо оптимальну гучність
+        sfxHorn.volume = 0.50;
+        sfxQuack.volume = 0.45;
+
+        function playHornSound() {
+            try {
+                sfxHorn.currentTime = 0; // Скидаємо до початку для уникнення затримок
+                sfxHorn.play().catch(e => console.log("Horn blocked by browser rules:", e));
+            } catch (e) {
+                console.log("Horn sound failed:", e);
+            }
+        }
+
+        function playQuackSound() {
+            // Звук квакання дозволено викликати тільки якщо качки все ще біжать
+            if (!isRacing) return;
+
+            try {
+                sfxQuack.currentTime = 0; // Дозволяє качкам квакати одночасно та часто
+                sfxQuack.play().catch(e => console.log("Quack blocked by browser rules:", e));
+            } catch (e) {
+                console.log("Quack sound failed:", e);
+            }
+        }
 
         function drawCustomDuck(canvasId, hueColor) {
             const canvas = document.getElementById(canvasId);
@@ -446,6 +476,10 @@ Delta</textarea>
             const totalDurationMs = duration * 1000;
             let winner = null;
             
+            // Вмикаємо режим гонки та даємо стартовий гудок!
+            isRacing = true;
+            playHornSound();
+
             timerInterval = setInterval(() => {
                 if (winner) return;
                 timeLeft--;
@@ -458,6 +492,11 @@ Delta</textarea>
                 const timeProgress = Math.min(elapsedMs / totalDurationMs, 1.0);
                 
                 let maxPosition = 0;
+
+                // Випадкові крякання відбуваються ТІЛЬКИ під час активного забігу
+                if (Math.random() < 0.018 && !winner) {
+                    playQuackSound();
+                }
 
                 ducks.forEach(duck => {
                     if (winner) return;
@@ -498,6 +537,7 @@ Delta</textarea>
 
                     if (duck.position >= finishLineX && !winner) {
                         winner = duck.name;
+                        isRacing = false; // Вимикаємо крякання в ту саму мілісекунду, коли є лідер
                     }
 
                     duck.element.style.left = duck.position + 'px';
@@ -511,12 +551,13 @@ Delta</textarea>
                 }
 
                 if (timeProgress >= 1.0 || winner) {
+                    isRacing = false; 
                     clearInterval(raceInterval);
                     clearInterval(timerInterval);
                     
                     if (!winner && ducks.length > 0) {
                         const sorted = [...ducks].sort((a,b) => b.position - a.position);
-                        winner = sorted[0].name; 
+                        winner = sorted.name; 
                     }
                     declareWinner(winner);
                 }
@@ -533,6 +574,7 @@ Delta</textarea>
         }
 
         function resetGame() {
+            isRacing = false;
             document.getElementById('setup-container').classList.remove('hidden');
             document.getElementById('race-container').classList.add('hidden');
             document.getElementById('winner-display').classList.add('hidden');
