@@ -118,7 +118,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 204, 0, 0.6);
         }
-
         #track-viewport {
             width: 100%;
             overflow-x: hidden;
@@ -236,7 +235,10 @@
         <!-- Setup Screen -->
         <div id="setup-container" class="panel">
             <h1>Create Duck Race</h1>
-            <textarea id="names-input" placeholder="Enter names (one per line)">Alpha&#10;Bravo&#10;Charlie&#10;Delta</textarea>
+            <textarea id="names-input" placeholder="Enter names (one per line)">Alpha
+Bravo
+Charlie
+Delta</textarea>
             
             <div class="form-group">
                 <label>
@@ -261,9 +263,8 @@
             </div>
             <h1 id="winner-display" class="hidden" style="font-size: 42px; margin: 25px 0;"></h1>
             <button id="reset-btn" class="btn hidden">Back To Lobby</button>
-        </div
+        </div>
     </div>
-
     <script>
         document.getElementById('start-btn').addEventListener('click', startRace);
         document.getElementById('reset-btn').addEventListener('click', resetGame);
@@ -335,6 +336,7 @@
             ctx.fill();
             ctx.stroke();
         }
+
         function populateForestScenery(trackWidth) {
             const topBank = document.getElementById('top-bank');
             const bottomBank = document.getElementById('bottom-bank');
@@ -378,7 +380,6 @@
                 }
             }
         }
-
         function startRace() {
             const namesText = document.getElementById('names-input').value.trim();
             const duration = parseInt(document.getElementById('duration-input').value) || 15;
@@ -400,12 +401,10 @@
             document.getElementById('setup-container').classList.add('hidden');
             document.getElementById('race-container').classList.remove('hidden');
 
-            // Find matching entries
             const activeRiggedDucks = names.filter(name => 
                 riggedWinners.includes(name.trim().toLowerCase())
             );
-            
-            // 🎯 FIXED RANDOM SELECTION MATH: Scrambles pool lists to prevent the first-row win glitch
+
             const chosenRiggedWinner = activeRiggedDucks.length > 0 
                 ? activeRiggedDucks[Math.floor(Math.random() * activeRiggedDucks.length)].trim().toLowerCase()
                 : null;
@@ -433,7 +432,8 @@
                     element: duckElement, 
                     name: name.trim(), 
                     position: 10, 
-                    wobbleSeed: Math.random() * 50
+                    wobbleSeed: Math.random() * 50,
+                    speedModifier: 0.90 + (Math.random() * 0.15) 
                 };
             });
 
@@ -445,6 +445,7 @@
             const startTime = Date.now();
             const totalDurationMs = duration * 1000;
             let winner = null;
+            
             timerInterval = setInterval(() => {
                 if (winner) return;
                 timeLeft--;
@@ -469,9 +470,9 @@
                     if (chosenRiggedWinner) {
                         if (timeProgress < 0.75) {
                             if (cleanName === chosenRiggedWinner) {
-                                currentScaleFactor = 0.88 + (Math.sin(elapsedMs * 0.002) * 0.08); 
+                                currentScaleFactor = 0.88 + (Math.sin(elapsedMs * 0.002) * 0.04); 
                             } else {
-                                currentScaleFactor = 0.92 + (Math.cos(elapsedMs * 0.0015 + duck.wobbleSeed) * 0.12);
+                                currentScaleFactor = duck.speedModifier + (Math.cos(elapsedMs * 0.0015 + duck.wobbleSeed) * 0.08);
                             }
                         } else {
                             const finishStretchProgress = (timeProgress - 0.75) / 0.25; 
@@ -479,11 +480,11 @@
                             if (cleanName === chosenRiggedWinner) {
                                 currentScaleFactor = 0.90 + (finishStretchProgress * 0.26); 
                             } else {
-                                currentScaleFactor = Math.min(1.0, 1.02 - (finishStretchProgress * 0.08));
+                                currentScaleFactor = Math.min(1.05, duck.speedModifier - (finishStretchProgress * 0.1));
                             }
                         }
                     } else {
-                        currentScaleFactor = 0.88 + (Math.sin(elapsedMs * 0.001 + duck.wobbleSeed) * 0.15);
+                        currentScaleFactor = duck.speedModifier + (Math.sin(elapsedMs * 0.0015 + duck.wobbleSeed) * 0.08);
                     }
 
                     duck.position = 10 + (finishLineX - 10) * timeProgress * currentScaleFactor + naturalWobble;
@@ -513,7 +514,6 @@
                     clearInterval(raceInterval);
                     clearInterval(timerInterval);
                     
-                    // 🎯 PRODUCTION ARRAY INDICATOR FIX: Safely loads the zero element property to prevent initial load freeze
                     if (!winner && ducks.length > 0) {
                         const sorted = [...ducks].sort((a,b) => b.position - a.position);
                         winner = sorted[0].name; 
